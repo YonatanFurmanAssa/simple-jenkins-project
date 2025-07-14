@@ -29,8 +29,8 @@ pipeline {
                         backendImage.tag("latest")
                         
                         // Push to registry (uncomment when ready)
-                        // backendImage.push("${BUILD_NUMBER}")
-                        // backendImage.push("latest")
+                         backendImage.push("${BUILD_NUMBER}")
+                         backendImage.push("latest")
                     }
                 }
             }
@@ -58,7 +58,7 @@ pipeline {
             steps {
                 script {
                     // Start services with docker-compose
-                    sh 'docker-compose up -d'
+                    sh 'docker compose up -d'
                     
                     // Wait for services to be ready
                     sh 'sleep 10'
@@ -79,7 +79,7 @@ pipeline {
             }
             post {
                 always {
-                    sh 'docker-compose down'
+                    sh 'docker compose down'
                 }
             }
         }
