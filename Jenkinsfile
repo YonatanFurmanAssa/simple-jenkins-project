@@ -2,9 +2,9 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_REGISTRY = 'your-registry'
-        BACKEND_IMAGE = "${DOCKER_REGISTRY}/todo-backend"
-        FRONTEND_IMAGE = "${DOCKER_REGISTRY}/todo-frontend"
+        DOCKER_REGISTRY = 'yonatanfurmandocker'
+        BACKEND_IMAGE = "${DOCKER_REGISTRY}/jenkins-backend"
+        FRONTEND_IMAGE = "${DOCKER_REGISTRY}/jenkins-frontend"
         BUILD_NUMBER = "${env.BUILD_NUMBER}"
     }
     
