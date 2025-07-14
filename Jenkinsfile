@@ -49,7 +49,7 @@ pipeline {
                         def frontendImage = docker.build("${FRONTEND_IMAGE}:${BUILD_NUMBER}")
 
                         // Same authentication as backend
-                        docker.withRegistry('', 'docker-hub-credentials') {
+                        docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials') {
                             frontendImage.push("${BUILD_NUMBER}")
                             frontendImage.push('latest')
                         }
