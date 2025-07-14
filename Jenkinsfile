@@ -69,7 +69,7 @@ pipeline {
                         curl -f http://localhost:3001/health || exit 1
 
                         # Test frontend availability
-                        curl -f http://localhost:8080 || exit 1
+                        curl -f http://localhost:8081 || exit 1
 
                         # Test API endpoints
                         curl -f http://localhost:3001/api/users || exit 1
@@ -80,7 +80,6 @@ pipeline {
             post {
                 always {
                     sh 'docker compose down'
-                    sh 'test'
                 }
             }
         }
