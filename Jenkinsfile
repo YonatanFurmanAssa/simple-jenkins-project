@@ -32,10 +32,6 @@ pipeline {
                         }
                         // Tag as latest
                         backendImage.tag('latest')
-
-                        // Push to registry (uncomment when ready)
-                        backendImage.push("${BUILD_NUMBER}")
-                        backendImage.push('latest')
                     }
                 }
             }
