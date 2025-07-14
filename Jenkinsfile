@@ -74,7 +74,7 @@ pipeline {
 
                         # Test API endpoints
                         curl -f http://localhost:3001/api/users || exit 1
-                        curl -f http://localhost:3001/api/todosal || exit 1
+                        curl -f http://localhost:3001/api/todos || exit 1
                     '''
                 }
             }
