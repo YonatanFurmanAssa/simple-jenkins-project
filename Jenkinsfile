@@ -48,12 +48,11 @@ pipeline {
                         // Build Docker image
                         def frontendImage = docker.build("${FRONTEND_IMAGE}:${BUILD_NUMBER}")
 
-                        // Tag as latest
-                        frontendImage.tag('latest')
-
-                    // Push to registry (uncomment when ready)
-                    // frontendImage.push("${BUILD_NUMBER}")
-                    // frontendImage.push("latest")
+                        // Same authentication as backend
+                        docker.withRegistry('', 'docker-hub-credentials') {
+                            frontendImage.push("${BUILD_NUMBER}")
+                            frontendImage.push('latest')
+                        }
                     }
                 }
             }
