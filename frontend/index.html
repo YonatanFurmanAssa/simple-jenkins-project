@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .add-todo {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+        
+        .add-todo input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .add-todo input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .add-todo button {
+            padding: 15px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .add-todo button:hover {
+            background: #5a6fd8;
+        }
+        
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.2s;
+        }
+        
+        .todo-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .todo-item.completed {
+            opacity: 0.7;
+            border-left-color: #28a745;
+        }
+        
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+        }
+        
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+        
+        .todo-text {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .todo-user {
+            font-size: 14px;
+            color: #666;
+            margin-right: 15px;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .delete-btn:hover {
+            background: #c82333;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .users-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .users-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .user-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            min-width: 200px;
+        }
+        
+        .user-name {
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .user-email {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Todo App</h1>
+            <p>Powered by Docker & Jenkins</p>
+        </div>
+        
+        <div class="content">
+            <div class="add-todo">
+                <input type="text" id="todoInput" placeholder="Add a new todo...">
+                <button onclick="addTodo()">Add Todo</button>
+            </div>
+            
+            <div class="todo-list" id="todoList">
+                <div class="status">Loading todos...</div>
+            </div>
+            
+            <div class="users-section">
+                <h2>👥 Users</h2>
+                <div class="user-list" id="userList">
+                    <div class="status">Loading users...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        let users = [];
+        let todos = [];
+
+        // Load initial data
+        async function loadData() {
+            try {
+                const [usersResponse, todosResponse] = await Promise.all([
+                    fetch(`${API_BASE}/api/users`),
+                    fetch(`${API_BASE}/api/todos`)
+                ]);
+                
+                users = await usersResponse.json();
+                todos = await todosResponse.json();
+                
+                renderUsers();
+                renderTodos();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('todoList').innerHTML = '<div class="status">Error loading data. Make sure backend is running!</div>';
+            }
+        }
+
+        function renderUsers() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = users.map(user => `
+                <div class="user-card">
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-email">${user.email}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div class="status">No todos yet. Add one above!</div>';
+                return;
+            }
+
+            todoList.innerHTML = todos.map(todo => {
+                const user = users.find(u => u.id === todo.userId);
+                return `
+                    <div class="todo-item ${todo.completed ? 'completed' : ''}">
+                        <input type="checkbox" class="todo-checkbox" 
+                               ${todo.completed ? 'checked' : ''} 
+                               onchange="toggleTodo(${todo.id})">
+                        <div class="todo-text">${todo.title}</div>
+                        <div class="todo-user">${user ? user.name : 'Unknown'}</div>
+                        <button class="delete-btn" onclick="deleteTodo(${todo.id})">Delete</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function addTodo() {
+            const input = document.getElementById('todoInput');
+            const title = input.value.trim();
+            
+            if (!title) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/todos`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: 1, // Default to first user
+                        title: title
+                    })
+                });
+
+                const newTodo = await response.json();
+                todos.push(newTodo);
+                input.value = '';
+                renderTodos();
+            } catch (error) {
+                console.error('Error adding todo:', error);
+            }
+        }
+
+        async function toggleTodo(id) {
+            try {
+                const response = await fetch(`${API_BASE}/api/todos/${id}`, {
+                    method: 'PUT'
+                });
+
+                const updatedTodo = await response.json();
+                const index = todos.findIndex(t => t.id === id);
+                todos[index] = updatedTodo;
+                renderTodos();
+            } catch (error) {
+                console.error('Error toggling todo:', error);
+            }
+        }
+
+        async function deleteTodo(id) {
+            try {
+                await fetch(`${API_BASE}/api/todos/${id}`, {
+                    method: 'DELETE'
+                });
+
+                todos = todos.filter(t => t.id !== id);
+                renderTodos();
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+
+        // Allow Enter key to add todo
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>
